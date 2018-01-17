@@ -5,7 +5,7 @@ all: test
 
 test: gftest
 
-gftest: gftest.o
+gftest.exe: gftest.o
 	$(CXX) -g $(CXXFLAGS) -o $@ $^
 
 %.o: %.cpp
