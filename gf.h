@@ -1,114 +1,130 @@
+#include<limits>
 
 /* https://www.kernel.org/pub/linux/kernel/people/hpa/raid6.pdf */
 
 /* x^8 + x^4 + x^3 + x^2 + 1 mod 255 */
 // 00011101
 
-template<typename STORAGE, int POLY, int PRIME>
+template<int N>
+struct GF2Constants
+{
+  static const int64_t POLY;
+  static const int64_t MOD;
+};
+
+template<>
+struct GF2Constants<8>
+{
+  static const int64_t POLY = 0x1d;
+  static const int64_t MOD = 256;
+};
+
+template<int N>
 class GF2
 {
   public:
-    STORAGE value;
-		static STORAGE log[PRIME];
-		static STORAGE ilog[PRIME];
+    int64_t value;
+		static int64_t log[GF2Constants<N>::MOD];
+		static int64_t ilog[GF2Constants<N>::MOD];
 
     static void init()
     {
-      STORAGE c = 1;
-      for(int i = 0; i < PRIME; i++, c = GF2::LFSR(c))
+      int64_t c = 1;
+      for(int64_t i = 0; i < GF2Constants<N>::MOD; i++, c = GF2::LFSR(c))
       {
         GF2::log[c] = i;
         GF2::ilog[i] = c;
       }
     }
 
-    constexpr GF2(STORAGE value) : value(value)
+    constexpr GF2(int64_t value) : value(value)
     {
     }
+
     constexpr GF2() : value(0)
     {
     }
 
-    constexpr static STORAGE LFSR(STORAGE c)
+    constexpr static int64_t LFSR(int64_t c)
     {
-      return ((( (c) << 1) ^ ((c & 1 << (8 *sizeof(STORAGE) -1) ) ?  POLY : 0) ));
+      return ((( (c) << 1) ^ ((c & 1 << (N-1) ) ?  GF2Constants<N>::POLY : 0) )) % GF2Constants<N>::MOD;
     }
 
     bool operator == (GF2 b);
-    GF2<STORAGE, POLY, PRIME> operator +(GF2<STORAGE, POLY, PRIME> b);
-    GF2<STORAGE, POLY, PRIME> operator +=(GF2<STORAGE, POLY, PRIME> b);
-    GF2<STORAGE, POLY, PRIME> operator -(GF2<STORAGE, POLY, PRIME> b);
-    GF2<STORAGE, POLY, PRIME> operator -=(GF2<STORAGE, POLY, PRIME> b);
-    GF2<STORAGE, POLY, PRIME> operator *(GF2<STORAGE, POLY, PRIME> b);
-    GF2<STORAGE, POLY, PRIME> operator /(GF2<STORAGE, POLY, PRIME> b);
-    GF2<STORAGE, POLY, PRIME> minv();
+    GF2<N> operator +(GF2<N> b);
+    GF2<N> operator +=(GF2<N> b);
+    GF2<N> operator -(GF2<N> b);
+    GF2<N> operator -=(GF2<N> b);
+    GF2<N> operator *(GF2<N> b);
+    GF2<N> operator /(GF2<N> b);
+    GF2<N> minv();
 
 };
 
-template<typename STORAGE, int POLY, int PRIME>
-STORAGE GF2<STORAGE, POLY, PRIME> :: log[PRIME];
+template<int N>
+int64_t GF2<N> :: log[GF2Constants<N>::MOD];
 
-template<typename STORAGE, int POLY, int PRIME>
-STORAGE GF2<STORAGE, POLY, PRIME> :: ilog[PRIME];
+template<int N>
+int64_t GF2<N> :: ilog[GF2Constants<N>::MOD];
 
-template<typename STORAGE, int POLY, int PRIME>
-bool GF2<STORAGE, POLY, PRIME> :: operator == (GF2<STORAGE, POLY, PRIME> b)
+template<int N>
+bool GF2<N> :: operator == (GF2<N> b)
 {
   return (value == b.value);
 }
 
-template<typename STORAGE, int POLY, int PRIME>
-GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator +(GF2<STORAGE, POLY, PRIME> b)
+template<int N>
+GF2<N> GF2<N> :: operator +(GF2<N> b)
 {
   return this->value ^ b.value;
 }
 
-template<typename STORAGE, int POLY, int PRIME>
-GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator +=(GF2<STORAGE, POLY, PRIME> b)
+template<int N>
+GF2<N> GF2<N> :: operator +=(GF2<N> b)
 {
   return this->value ^= b.value;
 }
 
-template<typename STORAGE, int POLY, int PRIME>
-GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator -(GF2<STORAGE, POLY, PRIME> b)
+template<int N>
+GF2<N> GF2<N> :: operator -(GF2<N> b)
 {
   return *this + b;
 }
 
-template<typename STORAGE, int POLY, int PRIME>
-GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator -=(GF2<STORAGE, POLY, PRIME> b)
+template<int N>
+GF2<N> GF2<N> :: operator -=(GF2<N> b)
 {
   return *this += b;
 }
 
-template<typename STORAGE, int POLY, int PRIME>
-GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator *(GF2<STORAGE, POLY, PRIME> b)
+template<int N>
+GF2<N> GF2<N> :: operator *(GF2<N> b)
 {
   if (*this == 0 || b == 0) return 0;
 
-  int log_sum = GF2<STORAGE, POLY, PRIME>::log[value] + GF2<STORAGE, POLY, PRIME>::log[b.value];
-  if (log_sum >= PRIME) log_sum -= PRIME;
-  return GF2<STORAGE, POLY, PRIME>::ilog[log_sum];
+  int64_t log_sum = GF2<N>::log[value] + GF2<N>::log[b.value];
+  if (log_sum >= GF2Constants<N>::MOD) log_sum -= (GF2Constants<N>::MOD - 1);
+  return GF2<N>::ilog[log_sum];
 }
 
-template<typename STORAGE, int POLY, int PRIME>
-GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator /(GF2<STORAGE, POLY, PRIME> b)
+template<int N>
+GF2<N> GF2<N> :: operator /(GF2<N> b)
 {
   if (*this == 0 || b == 0) return 0;
 
-  int log_sub = GF2<STORAGE, POLY, PRIME>::log[value] - GF2<STORAGE, POLY, PRIME>::log[b.value];
-  if (log_sub < 0) log_sub += PRIME;
-  return GF2<STORAGE, POLY, PRIME>::ilog[log_sub];
+  int64_t log_sub = GF2<N>::log[value] - GF2<N>::log[b.value];
+  if (log_sub < 0) log_sub += (GF2Constants<N>::MOD - 1);
+  return GF2<N>::ilog[log_sub];
 }
 
-template<typename STORAGE, int POLY, int PRIME>
-GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: minv()
+template<int N>
+GF2<N> GF2<N> :: minv()
 {
-  return GF2<STORAGE, POLY, PRIME>::ilog[PRIME - GF2<STORAGE, POLY, PRIME>::log[value]];
+  return GF2<N>(1) / *this;
 }
 
-template<typename STORAGE, int POLY, int PRIME>
-std::ostream &operator<<(std::ostream &os, GF2<STORAGE, POLY, PRIME> const &m) {
+template<int N>
+std::ostream &operator<<(std::ostream &os, GF2<N> const &m) {
       return os << static_cast<int>(m.value);
 }
 
