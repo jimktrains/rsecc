@@ -2,7 +2,7 @@
 
 /* https://www.kernel.org/pub/linux/kernel/people/hpa/raid6.pdf */
 
-/* x^8 + x^4 + x^3 + x^2 + 1 mod 255 */
+/* x^8 + x^4 + x^3 + x^2 + 1 mod 256 */
 // 00011101
 
 template<int N>
@@ -17,6 +17,13 @@ struct GF2Constants<8>
 {
   static const int64_t POLY = 0x1d;
   static const int64_t MOD = 256;
+};
+
+template<>
+struct GF2Constants<4>
+{
+  static const int64_t POLY = 0x3;
+  static const int64_t MOD = 16;
 };
 
 template<int N>
