@@ -1,4 +1,3 @@
-#include<array>
 #include<iostream>
 #include "gf.h"
 #include "gfpoly.h"
@@ -38,6 +37,9 @@ int main()
   std::cout << "y=" << y << std::endl;
   std::cout << "z=" << z << std::endl;
   std::cout << "y*z=" << (y*z) << std::endl;
-  std::cout << "(y*z)/y=" << ((y*z)/y) << std::endl;
+  auto yzy = ((y*z)/y);
+  auto yzz = ((y*z)/z);
+  std::cout << "(y*z)/y=" << yzy.first << " rem: " << yzy.second << std::endl;
+  std::cout << "(y*z)/z=" << yzz.first << " rem: " << yzz.second << std::endl;
   return 0;
 }

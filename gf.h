@@ -4,7 +4,7 @@
 /* x^8 + x^4 + x^3 + x^2 + 1 mod 255 */
 // 00011101
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 class GF2
 {
   public:
@@ -45,43 +45,43 @@ class GF2
 
 };
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 STORAGE GF2<STORAGE, POLY, PRIME> :: log[PRIME];
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 STORAGE GF2<STORAGE, POLY, PRIME> :: ilog[PRIME];
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 bool GF2<STORAGE, POLY, PRIME> :: operator == (GF2<STORAGE, POLY, PRIME> b)
 {
   return (value == b.value);
 }
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator +(GF2<STORAGE, POLY, PRIME> b)
 {
   return this->value ^ b.value;
 }
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator +=(GF2<STORAGE, POLY, PRIME> b)
 {
   return this->value ^= b.value;
 }
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator -(GF2<STORAGE, POLY, PRIME> b)
 {
   return *this + b;
 }
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator -=(GF2<STORAGE, POLY, PRIME> b)
 {
   return *this += b;
 }
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator *(GF2<STORAGE, POLY, PRIME> b)
 {
   if (*this == 0 || b == 0) return 0;
@@ -91,7 +91,7 @@ GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator *(GF2<STORAGE, P
   return GF2<STORAGE, POLY, PRIME>::ilog[log_sum];
 }
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator /(GF2<STORAGE, POLY, PRIME> b)
 {
   if (*this == 0 || b == 0) return 0;
@@ -101,13 +101,13 @@ GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: operator /(GF2<STORAGE, P
   return GF2<STORAGE, POLY, PRIME>::ilog[log_sub];
 }
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 GF2<STORAGE, POLY, PRIME> GF2<STORAGE, POLY, PRIME> :: minv()
 {
   return GF2<STORAGE, POLY, PRIME>::ilog[PRIME - GF2<STORAGE, POLY, PRIME>::log[value]];
 }
 
-template<typename STORAGE, unsigned int POLY, unsigned int PRIME>
+template<typename STORAGE, int POLY, int PRIME>
 std::ostream &operator<<(std::ostream &os, GF2<STORAGE, POLY, PRIME> const &m) {
       return os << static_cast<int>(m.value);
 }
